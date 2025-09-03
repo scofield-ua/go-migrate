@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/scofield-ua/go-migrate/config"
 	"github.com/scofield-ua/go-migrate/db"
 	"github.com/scofield-ua/go-migrate/pkg/migrate"
 	"github.com/scofield-ua/go-migrate/tools"
@@ -25,26 +25,30 @@ var defaultFlags []cli.Flag = []cli.Flag{
 		Value:       "localhost",
 		Usage:       "Database host",
 		DefaultText: "localhost",
+		Sources:     cli.EnvVars("DB_HOST"),
 	},
 	&cli.StringFlag{
 		Name:     "u",
 		Usage:    "Database username",
 		Required: true,
+		Sources:  cli.EnvVars("DB_USERNAME"),
 	},
 	&cli.StringFlag{
 		Name:     "p",
 		Usage:    "Database password",
 		Required: true,
+		Sources:  cli.EnvVars("DB_PASSWORD"),
 	},
 	&cli.StringFlag{
 		Name:     "db",
 		Usage:    "Database name",
 		Required: true,
+		Sources:  cli.EnvVars("DB_NAME"),
 	},
 }
 
 func main() {
-	// defer conn.Close(context.Background())
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
 	cmd := &cli.Command{
 		Commands: []*cli.Command{
@@ -57,26 +61,17 @@ func main() {
 					Required: true,
 				}),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					conn, err := commandInit(cmd)
+					_, err := commandInit(cmd)
 					if err != nil {
 						return err
 					}
-					defer conn.Close(context.Background())
 
 					name := cmd.String("name")
 					dir := cmd.String("dir")
 
-					if name == "" {
-						return fmt.Errorf("name is required")
-					}
-
-					if dir == "" {
-						dir = "migrations"
-					}
-
 					err = migrate.CreateMigration(name, dir)
 					if err != nil {
-						return fmt.Errorf("name is required")
+						return err
 					}
 
 					log.Printf("Migration file successfully created: %s", name)
@@ -89,19 +84,14 @@ func main() {
 				Usage: "Apply migrations",
 				Flags: defaultFlags,
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					conn, err := commandInit(cmd)
+					dbConfig, err := commandInit(cmd)
 					if err != nil {
 						return err
 					}
-					defer conn.Close(context.Background())
 
 					dir := cmd.String("dir")
 
-					if dir == "" {
-						dir = "migrations"
-					}
-
-					migrate.RunMigrations(tools.MigrationUp, dir, conn)
+					migrate.RunMigrations(tools.MigrationUp, dir, dbConfig)
 
 					return nil
 				},
@@ -116,11 +106,10 @@ func main() {
 					DefaultText: "1",
 				}),
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					conn, err := commandInit(cmd)
+					dbConfig, err := commandInit(cmd)
 					if err != nil {
 						return err
 					}
-					defer conn.Close(context.Background())
 
 					step := cmd.Int("step")
 					dir := cmd.String("dir")
@@ -129,11 +118,7 @@ func main() {
 						step = 1
 					}
 
-					if dir == "" {
-						dir = "migrations"
-					}
-
-					err = migrate.RollbackMigration(step, dir, conn)
+					err = migrate.RollbackMigration(step, dir, dbConfig)
 					if err != nil {
 						return fmt.Errorf("%v", err)
 					}
@@ -146,19 +131,14 @@ func main() {
 				Usage: "Delete all databases and re-run migrations",
 				Flags: defaultFlags,
 				Action: func(ctx context.Context, cmd *cli.Command) error {
-					conn, err := commandInit(cmd)
+					dbConfig, err := commandInit(cmd)
 					if err != nil {
 						return err
 					}
-					defer conn.Close(context.Background())
 
 					dir := cmd.String("dir")
 
-					if dir == "" {
-						dir = "migrations"
-					}
-
-					err = migrate.FreshMigration(dir, conn)
+					err = migrate.FreshMigration(dir, dbConfig)
 					if err != nil {
 						return fmt.Errorf("%v", err)
 					}
@@ -174,26 +154,21 @@ func main() {
 	}
 }
 
-// 1. Connect to database
-// 2. Create migrations table
-func commandInit(cmd *cli.Command) (*pgx.Conn, error) {
-	conn, err := establishConnection(cmd.String("h"), cmd.String("u"), cmd.String("p"), cmd.String("db"))
+// Init database config and check if we need to create migrations table
+func commandInit(cmd *cli.Command) (*config.Config, error) {
+	dbConfig := config.Config{}
+	dbConfig.DB.SetHost(cmd.String("h"))
+	dbConfig.DB.SetUsername(cmd.String("u"))
+	dbConfig.DB.SetPassword(cmd.String("p"))
+	dbConfig.DB.SetDbName(cmd.String("db"))
+
+	conn, err := db.ConnectPostgreSQL(&dbConfig)
 	if err != nil {
 		return nil, err
 	}
+	defer conn.Close(context.Background())
 
 	db.CreateMigrationsTable(conn)
 
-	return conn, nil
-}
-
-func establishConnection(h string, u string, p string, d string) (*pgx.Conn, error) {
-	conn, err := db.ConnectToDatabase(h, u, p, d)
-
-	if err != nil {
-		log.Printf("Error during connection to the database: %v\n", err)
-		return nil, err
-	}
-
-	return conn, err
+	return &dbConfig, nil
 }

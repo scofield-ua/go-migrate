@@ -10,6 +10,8 @@ import (
 )
 
 func TestRunMigrations(t *testing.T) {
+	dbConfig := test.TestDbConfig()
+
 	sr := test.Setup(test.SetupParams{
 		T: t,
 	})
@@ -32,7 +34,7 @@ func TestRunMigrations(t *testing.T) {
 	test.FillUpMigrations(sr.MigrationsDir)
 
 	t.Log("Running migrations")
-	err = RunMigrations(tools.MigrationUp, sr.MigrationsDir, sr.Conn)
+	err = RunMigrations(tools.MigrationUp, sr.MigrationsDir, dbConfig)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,13 +60,13 @@ func TestRunMigrations(t *testing.T) {
 
 	// Re-run migrations to test if migrations are not going to execute multiple times
 	t.Log("Re-running migrations")
-	err = RunMigrations(tools.MigrationUp, sr.MigrationsDir, sr.Conn)
+	err = RunMigrations(tools.MigrationUp, sr.MigrationsDir, dbConfig)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	t.Log("Test 'down' migrations")
-	err = RunMigrations(tools.MigrationDown, sr.MigrationsDir, sr.Conn)
+	err = RunMigrations(tools.MigrationDown, sr.MigrationsDir, dbConfig)
 	if err != nil {
 		t.Fatal(err)
 	}

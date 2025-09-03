@@ -10,6 +10,8 @@ import (
 )
 
 func TestRollbackSingleMigration(t *testing.T) {
+	dbConfig := test.TestDbConfig()
+
 	sr := test.Setup(test.SetupParams{
 		T: t,
 	})
@@ -36,7 +38,7 @@ func TestRollbackSingleMigration(t *testing.T) {
 	t.Log("Migrations filling up")
 	test.FillUpMigrations(sr.MigrationsDir)
 
-	RunMigrations(tools.MigrationUp, sr.MigrationsDir, sr.Conn)
+	RunMigrations(tools.MigrationUp, sr.MigrationsDir, dbConfig)
 
 	var oldMigrCount int
 	err = sr.Conn.QueryRow(context.Background(), `select count(*) from "migrations"`).Scan(&oldMigrCount)
@@ -44,7 +46,7 @@ func TestRollbackSingleMigration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = RollbackMigration(1, sr.MigrationsDir, sr.Conn)
+	err = RollbackMigration(1, sr.MigrationsDir, dbConfig)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,6 +73,8 @@ func TestRollbackSingleMigration(t *testing.T) {
 }
 
 func TestRollbackAllMigration(t *testing.T) {
+	dbConfig := test.TestDbConfig()
+
 	sr := test.Setup(test.SetupParams{
 		T: t,
 	})
@@ -97,9 +101,9 @@ func TestRollbackAllMigration(t *testing.T) {
 	t.Log("Migrations filling up")
 	test.FillUpMigrations(sr.MigrationsDir)
 
-	RunMigrations(tools.MigrationUp, sr.MigrationsDir, sr.Conn)
+	RunMigrations(tools.MigrationUp, sr.MigrationsDir, dbConfig)
 
-	RollbackMigration(100, sr.MigrationsDir, sr.Conn)
+	RollbackMigration(100, sr.MigrationsDir, dbConfig)
 
 	t.Log("Check if tables are not exist")
 	var tableExist bool

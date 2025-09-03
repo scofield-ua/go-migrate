@@ -1,4 +1,14 @@
 services:
+  app:
+    image: golang:1.24-bookworm
+    working_dir: /app
+    volumes:
+      - ./:/app
+    environment:
+      DB_HOST: db
+      DB_NAME: testdb
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
   db:
     container_name: go-migrate-db
     image: postgres:17

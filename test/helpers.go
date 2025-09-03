@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/scofield-ua/go-migrate/config"
 	"github.com/scofield-ua/go-migrate/db"
 )
 
@@ -33,27 +34,9 @@ func Setup(params SetupParams) SetupResult {
 		params.T.Fatal(err)
 	}
 
-	dbhost := os.Getenv("DB_HOST")
-	if dbhost == "" {
-		dbhost = TestDbHost
-	}
+	dbConfig := TestDbConfig()
 
-	dbuser := os.Getenv("DB_USERNAME")
-	if dbuser == "" {
-		dbuser = TestDbUser
-	}
-
-	dbpwd := os.Getenv("DB_PASSWORD")
-	if dbpwd == "" {
-		dbpwd = TestPassword
-	}
-
-	dbname := os.Getenv("DB_DATABASE")
-	if dbname == "" {
-		dbname = TestDbName
-	}
-
-	conn, err := db.ConnectToDatabase(dbhost, dbuser, dbpwd, dbname)
+	conn, err := db.ConnectPostgreSQL(dbConfig)
 	if err != nil {
 		params.T.Fatal(err)
 	}
@@ -61,7 +44,7 @@ func Setup(params SetupParams) SetupResult {
 	// Delete test data
 	ctx := context.Background()
 	conn.Exec(ctx, `drop table if exists "migrations"`)
-	conn.Exec(ctx, `create database `+"\""+dbname+"\"")
+	conn.Exec(ctx, `create database `+"\""+dbConfig.DB.Database+"\"")
 
 	params.T.Log("Dev database has been created")
 	db.CreateMigrationsTable(conn)
@@ -129,4 +112,34 @@ func FillUpMigrations(dir string) {
 			f.WriteString("drop table articles;")
 		}
 	}
+}
+
+func TestDbConfig() *config.Config {
+	dbhost := os.Getenv("DB_HOST")
+	if dbhost == "" {
+		dbhost = TestDbHost
+	}
+
+	dbuser := os.Getenv("DB_USERNAME")
+	if dbuser == "" {
+		dbuser = TestDbUser
+	}
+
+	dbpwd := os.Getenv("DB_PASSWORD")
+	if dbpwd == "" {
+		dbpwd = TestPassword
+	}
+
+	dbname := os.Getenv("DB_DATABASE")
+	if dbname == "" {
+		dbname = TestDbName
+	}
+
+	dbConfig := config.Config{}
+	dbConfig.DB.SetHost(dbhost)
+	dbConfig.DB.SetUsername(dbuser)
+	dbConfig.DB.SetPassword(dbpwd)
+	dbConfig.DB.SetDbName(dbname)
+
+	return &dbConfig
 }

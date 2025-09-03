@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/scofield-ua/go-migrate/config"
 	"github.com/scofield-ua/go-migrate/db"
 	"github.com/scofield-ua/go-migrate/tools"
 )
@@ -21,8 +21,14 @@ const deleteAllTablesSql = `
 	$$;
 `
 
-func FreshMigration(dir string, conn *pgx.Conn) error {
-	_, err := conn.Exec(context.Background(), deleteAllTablesSql)
+func FreshMigration(dir string, config *config.Config) error {
+	conn, err := db.ConnectPostgreSQL(config)
+	if err != nil {
+		return err
+	}
+	defer conn.Close(context.Background())
+
+	_, err = conn.Exec(context.Background(), deleteAllTablesSql)
 	if err != nil {
 		log.Fatal(err)
 		return err
@@ -30,7 +36,7 @@ func FreshMigration(dir string, conn *pgx.Conn) error {
 
 	db.CreateMigrationsTable(conn)
 
-	RunMigrations(tools.MigrationUp, dir, conn)
+	RunMigrations(tools.MigrationUp, dir, config)
 
 	return nil
 }

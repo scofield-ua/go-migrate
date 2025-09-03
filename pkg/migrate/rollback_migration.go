@@ -8,11 +8,18 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/scofield-ua/go-migrate/config"
+	"github.com/scofield-ua/go-migrate/db"
 	"github.com/scofield-ua/go-migrate/tools"
 )
 
-func RollbackMigration(step int, dir string, conn *pgx.Conn) error {
+func RollbackMigration(step int, dir string, config *config.Config) error {
+	conn, err := db.ConnectPostgreSQL(config)
+	if err != nil {
+		return err
+	}
+	defer conn.Close(context.Background())
+
 	rolledback := 0
 	dirPath, _ := filepath.Abs(dir)
 
@@ -55,7 +62,7 @@ func RollbackMigration(step int, dir string, conn *pgx.Conn) error {
 			f.Name()
 
 			if strings.Contains(f.Name(), downMigr) {
-				fbytes, err = os.ReadFile(fmt.Sprintf("%s/%s", dirPath, f.Name()))
+				fbytes, _ = os.ReadFile(fmt.Sprintf("%s/%s", dirPath, f.Name()))
 				break
 			}
 		}

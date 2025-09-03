@@ -9,10 +9,18 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/scofield-ua/go-migrate/config"
+	"github.com/scofield-ua/go-migrate/db"
 	"github.com/scofield-ua/go-migrate/tools"
 )
 
-func RunMigrations(variant tools.MigrationVariant, migrDir string, conn *pgx.Conn) error {
+func RunMigrations(variant tools.MigrationVariant, migrDir string, config *config.Config) error {
+	conn, err := db.ConnectPostgreSQL(config)
+	if err != nil {
+		return err
+	}
+	defer conn.Close(context.Background())
+
 	dirPath, _ := filepath.Abs(migrDir)
 
 	migrFiles, err := os.ReadDir(dirPath)
@@ -21,7 +29,7 @@ func RunMigrations(variant tools.MigrationVariant, migrDir string, conn *pgx.Con
 	}
 
 	if len(migrFiles) == 0 {
-		log.Print("No migration files to run")
+		log.Println("No migration files to run")
 		return nil
 	}
 
