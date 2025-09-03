@@ -52,7 +52,7 @@ func TestRollbackSingleMigration(t *testing.T) {
 	}
 
 	var tableExist bool
-	err = sr.Conn.QueryRow(context.Background(), `
+	_ = sr.Conn.QueryRow(context.Background(), `
 		SELECT EXISTS (
     	SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = 'articles'
 		)
@@ -108,7 +108,7 @@ func TestRollbackAllMigration(t *testing.T) {
 	t.Log("Check if tables are not exist")
 	var tableExist bool
 	for _, table := range []string{"users", "messages", "articles"} {
-		err = sr.Conn.QueryRow(context.Background(), `
+		_ = sr.Conn.QueryRow(context.Background(), `
 		SELECT EXISTS (
     	SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = $1
 		)

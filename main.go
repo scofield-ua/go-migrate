@@ -48,7 +48,9 @@ var defaultFlags []cli.Flag = []cli.Flag{
 }
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	if os.Getenv("DEBUG") != "" {
+		log.SetFlags(log.LstdFlags | log.Lshortfile)
+	}
 
 	cmd := &cli.Command{
 		Commands: []*cli.Command{

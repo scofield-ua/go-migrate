@@ -5,6 +5,7 @@ services:
     volumes:
       - ./:/app
     environment:
+      DEBUG: "true"
       DB_HOST: db
       DB_NAME: testdb
       DB_USERNAME: postgres

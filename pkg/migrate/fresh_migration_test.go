@@ -38,7 +38,7 @@ func TestFreshMigration(t *testing.T) {
 
 	var tableExist bool
 	for _, n := range []string{"users", "messages"} {
-		err = sr.Conn.QueryRow(context.Background(), `
+		_ = sr.Conn.QueryRow(context.Background(), `
 			SELECT EXISTS (
     		SELECT 1 FROM pg_tables WHERE schemaname = 'public' AND tablename = $1
 			)
