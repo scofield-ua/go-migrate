@@ -2,7 +2,7 @@ package db
 
 import (
 	"github.com/jackc/pgx/v5"
-	"github.com/scofield-ua/go-migrate/config"
+	"github.com/scofield-ua/go-migrate/pkg/config"
 )
 
 func ConnectPostgreSQL(config *config.Config) (*pgx.Conn, error) {

@@ -6,8 +6,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/scofield-ua/go-migrate/config"
 	"github.com/scofield-ua/go-migrate/db"
+	"github.com/scofield-ua/go-migrate/pkg/config"
 	"github.com/scofield-ua/go-migrate/pkg/migrate"
 	"github.com/scofield-ua/go-migrate/tools"
 	"github.com/urfave/cli/v3"

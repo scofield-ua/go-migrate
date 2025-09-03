@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/scofield-ua/go-migrate/config"
 	"github.com/scofield-ua/go-migrate/db"
+	"github.com/scofield-ua/go-migrate/pkg/config"
 	"github.com/scofield-ua/go-migrate/tools"
 )
 

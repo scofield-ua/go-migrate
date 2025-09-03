@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/scofield-ua/go-migrate/config"
 	"github.com/scofield-ua/go-migrate/db"
+	"github.com/scofield-ua/go-migrate/pkg/config"
 	"github.com/scofield-ua/go-migrate/tools"
 )
 
