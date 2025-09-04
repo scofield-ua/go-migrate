@@ -4,6 +4,23 @@ Includes `migrations` table for migrations history. Create migration, add SQL co
 
 #### CLI Commands:
 
+All commands accepting database related parameters:
+
+`h` - database host
+
+`u` - database username
+
+`p` - database password
+
+`db` - database name
+
+You can also set env variable accordingly:
+`DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME`
+
+---
+
+**Available commands:**
+
 - **`migrate create --name=create_users_table`**
 
   This command will create 2 migration files with name `create_users_table.up.sql` and `create_users_table.down.sql`. `.down.sql` one going to be used for rollbacks
