@@ -21,8 +21,8 @@ const deleteAllTablesSql = `
 	$$;
 `
 
-func FreshMigration(dir string, config *config.Config) error {
-	conn, err := db.ConnectPostgreSQL(config)
+func FreshMigration(dir string, c *config.Config) error {
+	conn, err := db.ConnectPostgreSQL(c)
 	if err != nil {
 		return err
 	}
@@ -34,9 +34,9 @@ func FreshMigration(dir string, config *config.Config) error {
 		return err
 	}
 
-	db.CreateMigrationsTable(conn)
+	db.CreateMigrationsTable(c)
 
-	RunMigrations(tools.MigrationUp, dir, config)
+	RunMigrations(tools.MigrationUp, dir, c)
 
 	return nil
 }

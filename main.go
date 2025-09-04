@@ -170,7 +170,5 @@ func commandInit(cmd *cli.Command) (*config.Config, error) {
 	}
 	defer conn.Close(context.Background())
 
-	db.CreateMigrationsTable(conn)
-
 	return &dbConfig, nil
 }

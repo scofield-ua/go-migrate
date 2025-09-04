@@ -14,8 +14,10 @@ import (
 	"github.com/scofield-ua/go-migrate/tools"
 )
 
-func RunMigrations(variant tools.MigrationVariant, migrDir string, config *config.Config) error {
-	conn, err := db.ConnectPostgreSQL(config)
+func RunMigrations(variant tools.MigrationVariant, migrDir string, c *config.Config) error {
+	db.CreateMigrationsTable(c)
+
+	conn, err := db.ConnectPostgreSQL(c)
 	if err != nil {
 		return err
 	}

@@ -13,8 +13,8 @@ import (
 	"github.com/scofield-ua/go-migrate/tools"
 )
 
-func RollbackMigration(step int, dir string, config *config.Config) error {
-	conn, err := db.ConnectPostgreSQL(config)
+func RollbackMigration(step int, dir string, c *config.Config) error {
+	conn, err := db.ConnectPostgreSQL(c)
 	if err != nil {
 		return err
 	}

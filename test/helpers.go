@@ -47,7 +47,6 @@ func Setup(params SetupParams) SetupResult {
 	conn.Exec(ctx, `create database `+"\""+dbConfig.DB.Database+"\"")
 
 	params.T.Log("Dev database has been created")
-	db.CreateMigrationsTable(conn)
 
 	return SetupResult{
 		Conn: conn,
