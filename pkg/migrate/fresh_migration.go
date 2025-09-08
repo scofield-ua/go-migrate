@@ -36,7 +36,10 @@ func FreshMigration(dir string, c *config.Config) error {
 
 	db.CreateMigrationsTable(c)
 
-	RunMigrations(tools.MigrationUp, dir, c)
+	err = RunMigrations(tools.MigrationUp, dir, c)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
